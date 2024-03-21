@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Promise-Async-Await</title>
+  </head>
+  <body>
+    <script>
+      // what is async and await?
+
+      // async is a keyword which is used before a function to make that function async in nature
+
+      // async function always returns a promise, if it returns just a value , then it will wrap that value inside a promise and then return it
+
+      // as async function returns a promise we can apply then() and catch() method on that as well
+
+      // await can only be used inside of a async function
+
+      //  it removes the promise cahining concept and we don't need any callback to pass in the then() and catch() block, it's a syntactic sugar of promise chaning
+
+      const p = new Promise((res, rej) => {
+        res("Hey");
+      });
+
+      async function handlePromise() {
+        return p;
+      }
+
+      const result0 = handlePromise();
+      console.log(result0); //Promise {<pending>}
+      result0.then((data) => {
+        console.log(data); //Hey
+      });
+
+      async function handlePromiseAgain() {
+        return "Hello";
+      }
+
+      const result1 = handlePromiseAgain();
+      console.log(result1); //Promise {<fulfilled>: 'Hello'}
+      result1.then((data) => {
+        console.log(data); //Hello
+      });
+
+      //  using await along with async--used to handle promises
+
+      //  you have use the word await infront of the promsie
+
+      const p1 = new Promise((res, rej) => {
+        res("Promise Resolved");
+      });
+
+      async function resolvePromise() {
+        const val = await p1; // we stoire the data of resolve inside a variable
+        console.log(val); // Promise Resolved
+      }
+
+      resolvePromise();
+
+      //   The below code will no work in case of await
+
+      //   const p1res = resolvePromise();
+      //   p1res.then((data) => {
+      //     console.log(data);
+      //   });
+      //   console.log(resolvePromise());
+
+      // Important---  Difference b/w normal promise and async and await
+
+      const p2 = new Promise((res, rej) => {
+        setTimeout(() => {
+          res("p2 Promise Resolved");
+        }, 3000);
+      });
+
+      p2.then((data) => {
+        console.log(data); //p2 Promise Resolved
+        console.log("learning async await"); //learning async await
+      });
+
+      //  if we use this normally like above both the logs will happen simultaneously after 3sec --- p2 Promise Resolved and learning async await--as both the code is inside the .then() block
+
+      function getData() {
+        p2.then((data) => {
+          console.log(data); //p2 Promise Resolved
+        });
+        console.log("learning async await"); //learning async await---keeping this code outside of the .then() block--so it will be executed immediately and not wait for the promise to be resolved as it is outside the then() block--just putting the consumption of promise inside a funcion to visualize it better
+      }
+
+      getData();
+
+      const p3 = new Promise((res, rej) => {
+        setTimeout(() => {
+          res("p3 Promise Resolved");
+        }, 7000);
+      });
+
+      async function p3Promise() {
+        console.log("learning async await---when using await keyword 0");
+        // here the above code will be executed immediately as it is encountered before the await keyword---so, it's executed first and then the rest of the code is executed
+        const val1 = await p3;
+        console.log("learning async await---when using await keyword 1");
+        console.log(val1); // p3 Promise Resolved
+        console.log("learning async await---when using await keyword 2");
+
+        const val2 = await p3;
+        console.log("learning async await---when using await keyword 1");
+        console.log(val2); // p3 Promise Resolved
+        console.log("learning async await---when using await keyword 2");
+      }
+
+      // here in the above code we are taking the same promsie twice so after 7 sce all the 6 lines of code will be printed together
+
+      p3Promise();
+
+      //  so, in case of async and awiat together the js engine was basically waiting for the promise to be resolved and once the promise was resolved it printed all the code together at the same time (which is the time taken for the promise to be resolved)
+
+      const p4 = new Promise((res, rej) => {
+        setTimeout(() => {
+          res("p4 Promise Resolved");
+        }, 10000);
+      });
+
+      const p5 = new Promise((res, rej) => {
+        setTimeout(() => {
+          res("p5 Promise Resolved");
+        }, 5000);
+      });
+
+      async function newFun1() {
+        console.log("Hello Everyone");
+        const res1 = await p4;
+        console.log(res1);
+        console.log("learning async await---when using await keyword 1");
+
+        const res2 = await p5;
+        console.log(res2);
+        console.log("learning async await---when using await keyword 2");
+      }
+
+      newFun1();
+
+      // as soon as we call the newFun1() it will come inside the call stack--then it will immediately executed console.log("Hello Everyone"); this line then it encounters the await keyword---now comes the interesting part---now the newFun1 functions execution will be suspended and will wait until the promise is resolved and it will be removed from the call stack and the call stack will become empty--so that if any other events are happening like button clicks and all they will work seamlessly---when p4 is resolved after 10 sec (for 10sec call stack is empty) newFun1 function will come back in the stack and it will start executing form the point where it left--and it will print console.log(res1);console.log("learning async await---when using await keyword 1"); these 2 lines and then it finds another awiat and it will check whether that promsie is resolved or not and it will find that p5 has been resolved in 5 sec and that's why it will print all the 4 lines together after 10 sec only
+
+      const p6 = new Promise((res, rej) => {
+        setTimeout(() => {
+          res("p6 Promise Resolved");
+        }, 5000);
+      });
+
+      const p7 = new Promise((res, rej) => {
+        setTimeout(() => {
+          res("p7 Promise Resolved");
+        }, 10000);
+      });
+
+      async function newFun2() {
+        console.log("Hello Everyone Again");
+        const res3 = await p6;
+        console.log(res3);
+        console.log("learning async await---when using await keyword 1");
+
+        const res4 = await p7;
+        console.log(res4);
+        console.log("learning async await---when using await keyword 2");
+      }
+
+      newFun2();
+
+      // as soon as we call the newFun1() it will come inside the call stack--then it will immediately executed console.log("Hello Everyone Again"); this line then it encounters the await keyword---now comes the interesting part---now the newFun1 functions execution will be suspended and will wait until the promise is resolved and it will be removed from the call stack and the call stack will become empty--so that if any other events are happening like button clicks and all they will work seamlessly---when p6 is resolved after5 sec (for 5sec call stack is empty) newFun2 function will come back in the stack and it will start executing fromm the point where it left--and it will print console.log(res3);console.log("learning async await---when using await keyword 1"); these 2 lines and then it finds another awiat and it will check whether that promsie is resolved or not and it will find that p7 has not been resolved in 5 sec and the time is 10sec and that's why it will print all the first 2 lines of p6 promise after 5sec and after that it will print p7 promises 2 lines after 10 sec
+
+      //   real world example with fetch()
+
+      const API_URL = "https://api.github.com/users/debu100";
+
+      async function handleFecth() {
+        try {
+          const userData = await fetch(API_URL); //userData is aresponse object which is a readbaleStram
+          // fetch returns a promise and when this promsie is resolved it gives you a response object---which has a body which has a readableStream--we can convert this readableStream into JSON as Respone.json()--this Respone.json() is again a promise---when this promise is resolved,it gives you the result or the json value
+          const jsonValue = await userData.json(); //converting into a json
+          // userData.json();---this is a promise---returns a json value
+          console.log(jsonValue); //json data
+        } catch (err) {
+          alert("problem with api");
+        }
+      }
+
+      //   we can use .then() also with fetch()
+
+      handleFecth().catch((err) => {
+        console.log(err);
+      }); //handleFecth asunc function returns a promise--can use then() and catch() function on it
+    </script>
+  </body>
+</html>
